@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Horario iOS</title>
+
+  <style>
+    /* ===============================
+       ESTILOS BASE Y TRANSICIONES iOS
+       =============================== */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      transition: background-color 1.5s ease;
+      background: linear-gradient(160deg, #2c2c2e, #1c1c1e);
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* ===============================
+       CONTENEDOR PRINCIPAL
+       =============================== */
+    .container {
+      position: relative;
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 20px;
+      min-height: 90vh;
+      background: rgba(44, 44, 46, 0.3);
+      backdrop-filter: blur(20px) saturate(1.5);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      transition: all 0.5s ease-in-out;
+      overflow: hidden;
+    }
+
+    /* Contenido que se desenfocará al abrir el menú */
+    .content {
+      transition: filter 0.3s ease;
+    }
+    .content.blurred {
+      filter: blur(5px);
+    }
+
+    /* ===============================
+       HEADER Y BOTÓN DE MENÚ
+       =============================== */
+    .header {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 20px;
+    }
+    .menu-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(20px);
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease;
+      font-size: 1.2rem;
+    }
+    .menu-btn:hover {
+      transform: scale(1.1);
+      animation: pulse 1s infinite;
+    }
+
+    /* ===============================
+       MENÚ LATERAL (siempre nítido)
+       =============================== */
+    .menu {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 220px;
+      padding: 15px;
+      background: rgba(44, 44, 46, 0.5);
+      backdrop-filter: blur(20px) saturate(1.5);
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 10000;
+    }
+    .menu.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .menu-handle {
+      width: 40px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 2px;
+      margin: 0 auto 10px auto;
+      cursor: pointer;
+    }
+    .menu-item {
+      padding: 12px;
+      margin: 6px 0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      color: #fff;
+    }
+    .menu-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* ===============================
+       GRILLA DE HORARIOS
+       =============================== */
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      transition: all 0.3s ease;
+    }
+
+    /* ===============================
+       COLUMNAS DE DÍA
+       =============================== */
+    .day-column {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px) saturate(1.3);
+      border-radius: 14px;
+      padding: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .day-column h3 {
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    /* ===============================
+       ITEMS DE CLASE
+       =============================== */
+    .class-item {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      font-size: 0.9em;
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      transition: transform 0.2s ease;
+    }
+    .class-item:hover {
+      transform: scale(1.02);
+    }
+
+    /* ===============================
+       RESPONSIVE
+       =============================== */
+    @media (max-width: 768px) {
+      .schedule-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ===============================
+       ANIMACIÓN PULSE (para efectos iOS)
+       =============================== */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Contenido principal (se desenfoca al abrir el menú) -->
+    <div class="content" id="content">
+      <div class="header">
+        <button class="menu-btn" id="menuBtn">☰</button>
+      </div>
+      <div class="schedule-grid" id="schedule"></div>
+    </div>
+    <!-- Menú lateral (nítido) -->
+    <nav class="menu" id="menu">
+      <div class="menu-handle" id="menuHandle"></div>
+      <div class="menu-item" data-day="all">Todos</div>
+      <div class="menu-item" data-day="lunes">Lunes</div>
+      <div class="menu-item" data-day="martes">Martes</div>
+      <div class="menu-item" data-day="miercoles">Miércoles</div>
+      <div class="menu-item" data-day="jueves">Jueves</div>
+      <div class="menu-item" data-day="viernes">Viernes</div>
+    </nav>
+  </div>
+
+  <script>
+    // Datos del horario
+    const scheduleData = {
+      lunes: [
+        { subject: 'Geografía', teacher: 'Siri' },
+        { subject: 'Geografía', teacher: 'Siri' },
+        { subject: 'Inglés', teacher: 'Taffarel' },
+        { subject: 'Inglés', teacher: 'Taffarel' },
+        { subject: 'Matemática', teacher: 'Carles' },
+        { subject: 'Matemática', teacher: 'Carles' }
+      ],
+      martes: [
+        { subject: 'F.E.C', teacher: 'González' },
+        { subject: 'F.E.C', teacher: 'González' },
+        { subject: 'Educ. Tec.', teacher: 'Bidondo' },
+        { subject: 'Educ. Tec.', teacher: 'Bidondo' },
+        { subject: 'Biología', teacher: 'Gauna' },
+        { subject: 'Biología', teacher: 'Gauna' }
+      ],
+      miercoles: [
+        { subject: 'Princ. Bás.', teacher: 'Perera' },
+        { subject: 'Princ. Bás.', teacher: 'Perera' },
+        { subject: 'Historia', teacher: 'Acosta' },
+        { subject: 'Historia', teacher: 'Acosta' },
+        { subject: 'Química', teacher: 'Orona' },
+        { subject: 'Química', teacher: 'Orona' }
+      ],
+      jueves: [
+        { subject: 'Matemática', teacher: 'Carles' },
+        { subject: 'Matemática', teacher: 'Carles' },
+        { subject: 'TGO I', teacher: 'Camera' },
+        { subject: 'TGO I', teacher: 'Camera' },
+        { subject: 'Lengua y Lit.', teacher: 'De María' },
+        { subject: 'Lengua y Lit.', teacher: 'De María' }
+      ],
+      viernes: [
+        { subject: 'Lengua y Lit.', teacher: 'De María' },
+        { subject: 'Lengua y Lit.', teacher: 'De María' },
+        { subject: 'Biología', teacher: 'Gauna' },
+        { subject: 'Micro', teacher: 'Otero' },
+        { subject: 'Micro', teacher: 'Otero' },
+        { subject: 'Tutoría', teacher: 'Horno, Atum' }
+      ]
+    };
+
+    const scheduleGrid = document.getElementById('schedule');
+    const menuBtn = document.getElementById('menuBtn');
+    const menu = document.getElementById('menu');
+    const menuHandle = document.getElementById('menuHandle');
+    const menuItems = document.querySelectorAll('.menu-item');
+    const content = document.getElementById('content');
+
+    let currentFilter = 'all'; // "all" o el día seleccionado
+
+    // Función para generar las columnas según el filtro
+    function generateColumns(filter = 'all') {
+      scheduleGrid.innerHTML = '';
+      Object.entries(scheduleData).forEach(([day, classes]) => {
+        if (filter !== 'all' && day !== filter) return;
+
+        const column = document.createElement('div');
+        column.className = 'day-column';
+        column.dataset.day = day;
+
+        const title = document.createElement('h3');
+        title.textContent = day.charAt(0).toUpperCase() + day.slice(1);
+
+        const classesContainer = document.createElement('div');
+        classes.forEach((cls, index) => {
+          const classItem = document.createElement('div');
+          classItem.className = 'class-item';
+          classItem.innerHTML = `
+            <strong>${index + 1}.</strong> ${cls.subject}<br>
+            <em>(${cls.teacher})</em>
+          `;
+          classesContainer.appendChild(classItem);
+        });
+
+        column.appendChild(title);
+        column.appendChild(classesContainer);
+        scheduleGrid.appendChild(column);
+      });
+    }
+
+    // Inicialmente, se muestran todos los días
+    generateColumns();
+
+    // Función para mostrar/ocultar el menú
+    function toggleMenu(open) {
+      if (open) {
+        menu.classList.add('active');
+        content.classList.add('blurred');
+        document.body.style.overflowY = 'hidden';
+      } else {
+        menu.classList.remove('active');
+        content.classList.remove('blurred');
+        document.body.style.overflowY = (currentFilter === 'all') ? 'auto' : 'hidden';
+      }
+    }
+
+    menuBtn.addEventListener('click', () => toggleMenu(true));
+    menuHandle.addEventListener('click', () => toggleMenu(false));
+
+    // Filtrado según el día seleccionado
+    menuItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const selectedDay = item.dataset.day;
+        currentFilter = selectedDay;
+        generateColumns(selectedDay);
+        document.body.style.overflowY = (selectedDay === 'all') ? 'auto' : 'hidden';
+        toggleMenu(false);
+      });
+    });
+  </script>
+</body>
+</html>
