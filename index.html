@@ -14,7 +14,6 @@
       height: 100%;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       transition: background-color 1.5s ease;
-      /* FONDO FIJO: DENIM */
       background: #173b61; 
       color: #fff;
       overflow-x: hidden;
@@ -28,7 +27,6 @@
       top: 0;
       left: 0;
       width: 200%;
-      /* Si tu página es muy larga, puedes usar height: 200% */
       height: 100%;
       z-index: 0;
       pointer-events: none;
@@ -49,7 +47,6 @@
 
     /* ===============================
        3. CONTENEDOR PRINCIPAL
-          (Deep Turquoise semitransparente)
        =============================== */
     .container {
       position: relative;
@@ -57,15 +54,14 @@
       margin: 40px auto;
       padding: 20px;
       min-height: 90vh;
-      background: rgba(23, 103, 110, 0.7); /* Deep Turquoise + alpha */
+      background: rgba(23, 103, 110, 0.7);
       backdrop-filter: blur(20px) saturate(1.5);
       border-radius: 20px;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
       transition: all 0.5s ease-in-out;
       overflow: hidden;
-      z-index: 1; /* Por encima del fondo dinámico */
+      z-index: 1;
     }
-    /* Contenido que se desenfoca al abrir el menú */
     .content {
       transition: filter 0.3s ease;
     }
@@ -105,8 +101,22 @@
     }
 
     /* ===============================
+       4.1. CARTELITO DEL DÍA ACTUAL
+       =============================== */
+    .current-day-message {
+      text-align: center;
+      font-size: 1.2em;
+      padding: 8px;
+      margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      color: #fff;
+      font-weight: bold;
+      z-index: 2;
+    }
+
+    /* ===============================
        5. MENÚ LATERAL
-          (Orange con algo de transparencia)
        =============================== */
     .menu {
       position: fixed;
@@ -114,7 +124,7 @@
       right: 20px;
       width: 220px;
       padding: 15px;
-      background: rgba(253, 185, 22, 0.9); /* Orange semitransparente */
+      background: rgba(253, 185, 22, 0.9);
       backdrop-filter: blur(20px) saturate(1.5);
       border-radius: 14px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
@@ -161,15 +171,14 @@
 
     /* ===============================
        7. COLUMNAS DE DÍA
-          (Grey Blue sólido)
        =============================== */
     .day-column {
       position: relative;
-      background: #7697a0; /* Grey Blue */
+      background: #7697a0;
       border-radius: 14px;
       padding: 15px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      transition: opacity 0.3s ease, transform 0.3s ease;
+      transition: opacity 0.3s ease, transform 0.8s ease;
       overflow: hidden;
       z-index: 1;
     }
@@ -184,16 +193,15 @@
 
     /* ===============================
        8. ITEMS DE CLASE
-          (Pure con algo de transparencia)
        =============================== */
     .class-item {
       position: relative;
-      background: rgba(255, 235, 208, 0.8); /* Pure semitransparente */
+      background: rgba(255, 235, 208, 0.8);
       padding: 12px;
       margin: 8px 0;
       border-radius: 8px;
       font-size: 0.9em;
-      color: #000; /* Texto en negro para contrastar */
+      color: #000;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
       transition: transform 0.2s ease;
       z-index: 2;
@@ -201,7 +209,6 @@
     .class-item:hover {
       transform: scale(1.02);
     }
-    /* Módulo actual según hora */
     .current-module {
       border: 2px solid #FFD700;
       background: rgba(255, 215, 0, 0.2);
@@ -233,15 +240,17 @@
   </style>
 </head>
 <body>
-  <!-- FONDO DINÁMICO DE MANCHAS DETRÁS DE TODO -->
+  <!-- FONDO DINÁMICO DE MANCHAS -->
   <div class="background-dynamic" id="backgroundDynamic"></div>
 
   <div class="container">
-    <!-- Contenido principal (se desenfoca al abrir el menú) -->
+    <!-- Contenido principal -->
     <div class="content" id="content">
       <div class="header">
         <button class="menu-btn" id="menuBtn">☰</button>
       </div>
+      <!-- Cartel del día actual -->
+      <div id="currentDayMessage" class="current-day-message"></div>
       <div class="schedule-grid" id="schedule"></div>
     </div>
 
@@ -261,23 +270,31 @@
     /* ===============================
        1. HORA ACTUAL EN ARGENTINA Y MÓDULO ACTUAL
        =============================== */
+    // Obtenemos la hora actual en Argentina
     const argentinaTime = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Argentina/Buenos_Aires" }));
     const currentMinutes = argentinaTime.getHours() * 60 + argentinaTime.getMinutes();
-    // Ejemplo de 6 módulos
+
+    // Definición de módulos:
+    // - El primer módulo inicia a las 8:10 PM (20:10), es decir, a los 1210 minutos.
+    // - Cada módulo dura 80 minutos.
+    const firstModuleStart = 20 * 60 + 10; // 20:10 → 1210 minutos
+    const moduleDuration = 80; // 80 minutos por módulo
     const modules = [
-      { start: 8 * 60 + 10, end: 8 * 60 + 59 },   // Módulo 1: 08:10 - 08:59
-      { start: 9 * 60,      end: 9 * 60 + 49 },   // Módulo 2: 09:00 - 09:49
-      { start: 10 * 60 + 10,end: 10 * 60 + 59 },  // Módulo 3: 10:10 - 10:59
-      { start: 11 * 60,     end: 11 * 60 + 49 },  // Módulo 4: 11:00 - 11:49
-      { start: 12 * 60 + 10,end: 12 * 60 + 59 },  // Módulo 5: 12:10 - 12:59
-      { start: 13 * 60,     end: 13 * 60 + 49 }   // Módulo 6: 13:00 - 13:49
+      { start: firstModuleStart, end: firstModuleStart + moduleDuration },
+      { start: firstModuleStart + moduleDuration, end: firstModuleStart + moduleDuration * 2 },
+      { start: firstModuleStart + moduleDuration * 2, end: firstModuleStart + moduleDuration * 3 },
+      { start: firstModuleStart + moduleDuration * 3, end: firstModuleStart + moduleDuration * 4 },
+      { start: firstModuleStart + moduleDuration * 4, end: firstModuleStart + moduleDuration * 5 },
+      { start: firstModuleStart + moduleDuration * 5, end: firstModuleStart + moduleDuration * 6 }
     ];
     let currentModuleIndex = -1;
+    // Sólo se resalta el módulo si la hora actual es igual o mayor al inicio de clases
     modules.forEach((mod, idx) => {
-      if (currentMinutes >= mod.start && currentMinutes <= mod.end) {
+      if (currentMinutes >= mod.start && currentMinutes < mod.end) {
         currentModuleIndex = idx;
       }
     });
+
     // Mapeo de día numérico a clave usada en scheduleData
     const daysMap = {
       0: "domingo",
@@ -289,6 +306,10 @@
       6: "sabado"
     };
     const currentDay = daysMap[argentinaTime.getDay()];
+
+    // Mostrar el mensaje del día actual
+    const currentDayMessage = document.getElementById("currentDayMessage");
+    currentDayMessage.textContent = `Hoy es ${currentDay.charAt(0).toUpperCase() + currentDay.slice(1)}`;
 
     /* ===============================
        2. DATOS DEL HORARIO
@@ -346,7 +367,7 @@
     const menuItems = document.querySelectorAll('.menu-item');
     const content = document.getElementById('content');
 
-    let currentFilter = 'all'; // "all" o el día seleccionado
+    let currentFilter = 'all';
 
     /* ===============================
        4. GENERAR LAS COLUMNAS (FILTRAR)
@@ -368,7 +389,9 @@
           const classItem = document.createElement('div');
           classItem.className = 'class-item';
 
-          // Resaltar el módulo actual si coincide día y módulo
+          // Resaltar el módulo actual solo si:
+          // 1. El día coincide con el actual.
+          // 2. La hora actual está dentro de uno de los módulos.
           if (day === currentDay && index === currentModuleIndex) {
             classItem.classList.add("current-module");
           }
@@ -384,7 +407,7 @@
         scheduleGrid.appendChild(column);
       });
     }
-    // Inicialmente, mostrar todos los días
+    // Mostrar inicialmente todos los días
     generateColumns();
 
     /* ===============================
@@ -417,7 +440,6 @@
 
     /* ===============================
        6. GENERAR MANCHAS DE FORMA ALEATORIA
-          EN EL FONDO GLOBAL
        =============================== */
     function startSpawningSpots(bgContainer) {
       function spawn() {
@@ -435,7 +457,7 @@
         spot.style.top = top + '%';
         spot.style.left = left + '%';
 
-        // Colores con algo más de opacidad
+        // Colores con opacidad
         const colors = [
           "rgba(255, 0, 0, 0.4)",
           "rgba(0, 255, 0, 0.4)",
@@ -446,25 +468,25 @@
         const color = colors[Math.floor(Math.random() * colors.length)];
         spot.style.backgroundColor = color;
 
-        // Duración aleatoria de la animación entre 3 y 6 seg
+        // Duración aleatoria de la animación entre 3 y 6 segundos
         const duration = Math.random() * 3 + 3;
         spot.style.animationDuration = duration + 's';
 
         bgContainer.appendChild(spot);
 
-        // Al terminar, se elimina
+        // Eliminar la mancha al finalizar la animación
         spot.addEventListener('animationend', () => {
           spot.remove();
         });
 
-        // Programar siguiente spawn (entre 500ms y 1500ms)
+        // Programar la siguiente mancha
         const delay = Math.random() * 1000 + 500;
         setTimeout(spawn, delay);
       }
       spawn();
     }
 
-    // Iniciar las manchas en el fondo principal
+    // Iniciar las manchas en el fondo
     const bgDynamic = document.getElementById('backgroundDynamic');
     startSpawningSpots(bgDynamic);
   </script>
