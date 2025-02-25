@@ -274,21 +274,16 @@
     const argentinaTime = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Argentina/Buenos_Aires" }));
     const currentMinutes = argentinaTime.getHours() * 60 + argentinaTime.getMinutes();
 
-    // Definición de módulos:
-    // - El primer módulo inicia a las 8:10 PM (20:10), es decir, a los 1210 minutos.
-    // - Cada módulo dura 80 minutos.
-    const firstModuleStart = 20 * 60 + 10; // 20:10 → 1210 minutos
-    const moduleDuration = 80; // 80 minutos por módulo
+    // Definición de módulos con los nuevos intervalos
     const modules = [
-      { start: firstModuleStart, end: firstModuleStart + moduleDuration },
-      { start: firstModuleStart + moduleDuration, end: firstModuleStart + moduleDuration * 2 },
-      { start: firstModuleStart + moduleDuration * 2, end: firstModuleStart + moduleDuration * 3 },
-      { start: firstModuleStart + moduleDuration * 3, end: firstModuleStart + moduleDuration * 4 },
-      { start: firstModuleStart + moduleDuration * 4, end: firstModuleStart + moduleDuration * 5 },
-      { start: firstModuleStart + moduleDuration * 5, end: firstModuleStart + moduleDuration * 6 }
+      { start: 1210, end: 1240 }, // 20:10 - 20:40
+      { start: 1240, end: 1270 }, // 20:40 - 21:10
+      { start: 1280, end: 1310 }, // 21:20 - 21:50
+      { start: 1310, end: 1340 }, // 21:50 - 22:20
+      { start: 1340, end: 1370 }, // 22:20 - 22:50
+      { start: 1370, end: 1400 }  // 22:50 - 23:20
     ];
     let currentModuleIndex = -1;
-    // Sólo se resalta el módulo si la hora actual es igual o mayor al inicio de clases
     modules.forEach((mod, idx) => {
       if (currentMinutes >= mod.start && currentMinutes < mod.end) {
         currentModuleIndex = idx;
@@ -316,44 +311,44 @@
        =============================== */
     const scheduleData = {
       lunes: [
-        { subject: 'Geografía', teacher: 'Siri' },
-        { subject: 'Geografía', teacher: 'Siri' },
-        { subject: 'Inglés', teacher: 'Taffarel' },
-        { subject: 'Inglés', teacher: 'Taffarel' },
-        { subject: 'Matemática', teacher: 'Carles' },
-        { subject: 'Matemática', teacher: 'Carles' }
+        { subject: 'Sistemas de Información Contable', teacher: 'Perera C.' },
+        { subject: 'Sistemas de Información Contable', teacher: 'Perera C.' },
+        { subject: 'Psicología', teacher: 'Martorel Sup.' },
+        { subject: 'Psicología', teacher: 'Martorel Sup.' },
+        { subject: 'Lengua y Literatura', teacher: 'Arrieta' },
+        { subject: 'Lengua y Literatura', teacher: 'Arrieta' }
       ],
       martes: [
-        { subject: 'F.E.C', teacher: 'González' },
-        { subject: 'F.E.C', teacher: 'González' },
-        { subject: 'Educ. Tec.', teacher: 'Bidondo' },
-        { subject: 'Educ. Tec.', teacher: 'Bidondo' },
-        { subject: 'Biología', teacher: 'Gauna' },
-        { subject: 'Biología', teacher: 'Gauna' }
+        { subject: 'Matemática', teacher: 'Cerrato (Sup. Ferreyra)' },
+        { subject: 'Matemática', teacher: 'Cerrato (Sup. Ferreyra)' },
+        { subject: 'Matemática', teacher: 'Cerrato (Sup. Ferreyra)' },
+        { subject: 'Derecho Comercial', teacher: 'Otero' },
+        { subject: 'Derecho Comercial', teacher: 'Otero' },
+        { subject: 'Derecho Comercial', teacher: 'Otero' }
       ],
       miercoles: [
-        { subject: 'Princ. Bás.', teacher: 'Perera' },
-        { subject: 'Princ. Bás.', teacher: 'Perera' },
-        { subject: 'Historia', teacher: 'Acosta' },
-        { subject: 'Historia', teacher: 'Acosta' },
-        { subject: 'Química', teacher: 'Orona' },
-        { subject: 'Química', teacher: 'Orona' }
+        { subject: 'Macro', teacher: 'Otero' },
+        { subject: 'Macro', teacher: 'Otero' },
+        { subject: 'Lengua y Literatura', teacher: 'Arrieta' },
+        { subject: 'Lengua y Literatura', teacher: 'Arrieta' },
+        { subject: 'Matemática', teacher: 'Cerrato (Sup. Ferreyra)' },
+        { subject: 'Historia', teacher: 'Acosta' }
       ],
       jueves: [
-        { subject: 'Matemática', teacher: 'Carles' },
-        { subject: 'Matemática', teacher: 'Carles' },
-        { subject: 'TGO I', teacher: 'Camera' },
-        { subject: 'TGO I', teacher: 'Camera' },
-        { subject: 'Lengua y Lit.', teacher: 'De María' },
-        { subject: 'Lengua y Lit.', teacher: 'De María' }
+        { subject: 'Lenguaje, Laboratorio y Práctica', teacher: 'Perera C' },
+        { subject: 'Lenguaje, Laboratorio y Práctica', teacher: 'Perera C' },
+        { subject: 'Sistemas de Información Contable', teacher: 'Perera C' },
+        { subject: 'Sistemas de Información Contable', teacher: 'Perera C' },
+        { subject: 'Tecnología de la Información', teacher: 'Sánchez (Sup. Bidondo)' },
+        { subject: 'Inglés', teacher: 'Taffarel' }
       ],
       viernes: [
-        { subject: 'Lengua y Lit.', teacher: 'De María' },
-        { subject: 'Lengua y Lit.', teacher: 'De María' },
-        { subject: 'Biología', teacher: 'Gauna' },
-        { subject: 'Micro', teacher: 'Otero' },
-        { subject: 'Micro', teacher: 'Otero' },
-        { subject: 'Tutoría', teacher: 'Horno, Atum' }
+        { subject: 'TGO II', teacher: 'Camera' },
+        { subject: 'TGO II', teacher: 'Camera' },
+        { subject: 'Tutoría', teacher: 'Atum' },
+        { subject: 'Geografía', teacher: 'Siri' },
+        { subject: 'Inglés', teacher: 'Taffarel' },
+        { subject: 'Inglés', teacher: 'Taffarel' }
       ]
     };
 
